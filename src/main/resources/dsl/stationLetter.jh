@@ -1,0 +1,62 @@
+/**
+* 在该表插入站内信内容
+*/
+entity MessageText {
+  msgTextId String required ,
+  title String required ,
+  content String required ,
+  language String required ,
+  isShow Boolean required
+  groupId Long
+}
+
+/**
+* 在 message 生成 MessageText msgTextId(四种语言都拥有相同 ID)，
+* 解决用户在其中一种语言下已读、删除，在别的语言下是未读不同步状态
+* 查看站内信类型：
+* PUBLIC ，直接去 MessageText 获取信息。
+* GROUP ，直接根据 MessageText 的 groupId 查询该用户是否在该分组，并读取信息。
+*/
+entity Message {
+  /*
+  * manager-id，因为没在一个系统操作。
+  */
+  publisher String required ,
+  /*
+  * UUID 唯一
+  */
+  msgTextId String required ,
+  messageType MessageType required
+}
+
+/**
+* 用户登录以后，根据该表最近一条时间，查询 Message 时间以后的所有 msgTextId ,
+* 再查看站内信类型：
+* PUBLIC ，直接去 MessageText 获取信息。
+* GROUP ，直接根据 MessageText 的 groupId 查询该用户是否在该分组，并读取信息。插入该表。
+* 用户在点击其中一条，并记录为已读。
+* 用户点击删除，则将状态改为删除。
+*/
+entity MessageCustomer {
+  userId Long required ,
+  msgId Long required ,
+  messageStatus MessageStatus required ,
+  messageType MessageType required
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+entity MessageGroup {
+  groupName String ,
+  userId Long ,
+  isShow Boolean ,
+  description String
+}
+
+enum MessageStatus {
+    UNREAD, READ, DELETE
+}
+
+enum MessageType {
+    PRIVATE, GROUP, PUBLIC
+}
